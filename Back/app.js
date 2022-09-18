@@ -1,8 +1,10 @@
 const dotenv = require('dotenv');
 const express = require('express');
 const mongoose = require('mongoose');
+const path = require('path');
 
 const userRoutes = require('./routes/userRoutes');
+const sauceRoutes = require('./routes/sauceRoutes');
 
 dotenv.config({ path: './config.env' });
 const dataBase = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD)
@@ -32,5 +34,33 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/auth', userRoutes);
+app.use('/api/sauces', sauceRoutes);
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
+// app.post('/api/sauces', (req, res, next) => {
+//     console.log(req.body);
+//     res.status(201).json({ message: 'Objet crée !' });
+//     next();
+// });
+
+
+
+// app.get('/api/sauces', (req, res, next) => {
+//     const sauces = [
+//         {
+//             userId: 1,
+//             name: 'coktail',
+//             manufacturer: 'DL'
+//         },
+//         {
+//             userId: 2,
+//             name: 'mayonnaise',
+//             manufacturer: 'amora'
+//         }
+//     ];
+//     res.status(200).json(sauces);
+// });
+
+
 
 module.exports = app;
