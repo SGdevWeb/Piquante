@@ -1,6 +1,7 @@
 const Sauce = require('../models/Sauce');
 const auth = require('../middleware/auth');
 const fs = require('fs');
+const { STATUS_CODES } = require('http');
 
 
 exports.createSauce = (req, res, next) => {
@@ -103,5 +104,44 @@ exports.deleteSauce = (req, res, next) => {
         .catch(error => {
             res.status(500).json({ error });
         });
+};
+
+exports.likeSauce = (req, res, next) => {
+    Sauce.findOne({ _id: req.params.id })
+        .then(sauce => {
+            let like = req.body.like
+            switch (like) {
+                case 1:
+                    sauce.likes += 1;
+                    sauce.usersLiked.push(req.body.userId);
+                    // console.log(sauce);
+                    sauce.save();
+                    res.status(200).json({ message: 'Like enregistré' });
+                    break;
+                case 0:
+                    if (sauce.usersLiked.includes(req.body.userId)) {
+                        sauce.likes -= 1;
+                        sauce.usersLiked = sauce.usersLiked.filter(user => user === !req.body.userId);
+                        // console.log(sauce);
+                        sauce.save();
+                        res.status(200).json({ message: 'Like annulé' });
+                    } else {
+                        sauce.dislikes -= 1;
+                        sauce.usersDisliked = sauce.usersDisliked.filter(user => user === !req.body.userId);
+                        // console.log(sauce);
+                        sauce.save();
+                        res.status(200).json({ message: 'Dislike annulé' });
+                    }
+                    break;
+                case -1:
+                    sauce.dislikes += 1;
+                    sauce.usersDisliked.push(req.body.userId);
+                    // console.log(sauce);
+                    sauce.save();
+                    res.status(200).json({ message: 'Dislike enregistré' });
+                    break;
+            }
+        })
+        .catch(error => res.status(401).json({ error }));
 };
 
