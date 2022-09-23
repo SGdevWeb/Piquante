@@ -1,21 +1,9 @@
 const Sauce = require('../models/Sauce');
 const auth = require('../middleware/auth');
 const fs = require('fs');
-const { STATUS_CODES } = require('http');
 
 
 exports.createSauce = (req, res, next) => {
-
-    /* createSauce sans multer */
-    //delete req.body._id;
-    // const sauce = new Sauce({
-    //     ...req.body
-    // });
-    // sauce.save()
-    //     .then(() => res.status(201).json({ message: 'Objet enregistré !' }))
-    //     .catch(error => res.status(400).json({ error }));
-
-    /* createSauce avec multer */
     console.log(req.body);
     console.log(req.body.sauce);
     const sauceObjet = JSON.parse(req.body.sauce);
@@ -47,14 +35,6 @@ exports.getAllSauces = (req, res, next) => {
 };
 
 exports.modifySauce = (req, res, next) => {
-    /* sans multer */
-    // console.log(req.body);
-    // Sauce.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
-    //     .then(() => res.status(200).json({ message: 'Objet modifié !' }))
-    //     .catch(error => res.status(400).json({ error }))
-
-    /* avec multer */
-    // console.log(req.body);
     const sauceObjet = req.file ? {
         ...JSON.parse(req.body.sauce),
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
@@ -82,12 +62,6 @@ exports.modifySauce = (req, res, next) => {
 };
 
 exports.deleteSauce = (req, res, next) => {
-    /* sans multer */
-    // Sauce.deleteOne({ _id: req.params.id })
-    //     .then(() => res.status(200).json({ message: 'Objet supprimé !' }))
-    //     .catch(error => res.status(400).json({ error }));
-
-    /* avec multer */
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
             if (sauce.userId != req.auth.userId) {
