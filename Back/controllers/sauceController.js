@@ -6,6 +6,9 @@ const fs = require('fs');
 exports.createSauce = (req, res, next) => {
     console.log(req.body);
     console.log(req.body.sauce);
+    if (Object.keys(req.body).length === 0) {
+        return res.status(400).json({ message: 'Saisie incorrecte' });
+    }
     const sauceObjet = JSON.parse(req.body.sauce);
     console.log(sauceObjet);
     console.log(req.auth.userId);

@@ -5,6 +5,9 @@ const User = require('../models/User');
 
 exports.signup = (req, res, next) => {
     // console.log(req.body);
+    if (Object.keys(req.body).length === 0) {
+        return res.status(400).json({ message: 'Saisie incorrecte' });
+    }
     bcrypt.hash(req.body.password, 10)
         .then(hash => {
             const user = new User({
@@ -19,10 +22,13 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-    // console.log(req.body);
+    //console.log(req.body);
+    if (Object.keys(req.body).length === 0) {
+        return res.status(400).json({ message: 'Saisie incorrecte' });
+    }
     User.findOne({ email: req.body.email })
         .then(user => {
-            if (!user) {
+            if (user === null) {
                 return res.status(401).json({ message: 'Paire login/mot de passe incorrecte' });
             }
             bcrypt.compare(req.body.password, user.password)
