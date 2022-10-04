@@ -1,4 +1,4 @@
-require('dotenv').config();
+const dotenv = require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -6,6 +6,7 @@ const path = require('path');
 const userRoutes = require('./routes/userRoutes');
 const sauceRoutes = require('./routes/sauceRoutes');
 
+// Base de donnée
 const dataBase = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD)
 
 mongoose.connect(dataBase,
@@ -16,6 +17,7 @@ mongoose.connect(dataBase,
     .then(() => console.log('Connexion à MongoDB réussie !'))
     .catch(() => console.log('Connexion à MongoDB échouée !'));
 
+// Aplication
 const app = express();
 
 app.use(express.json());

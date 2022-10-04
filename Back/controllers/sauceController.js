@@ -1,17 +1,13 @@
 const Sauce = require('../models/Sauce');
-const auth = require('../middleware/auth');
+const auth = require('../middlewares/auth');
 const fs = require('fs');
 
-
 exports.createSauce = (req, res, next) => {
-    console.log(req.body);
-    console.log(req.body.sauce);
+    // Lorsque le corps de la requête est un objet vide
     if (Object.keys(req.body).length === 0) {
         return res.status(400).json({ message: 'Saisie incorrecte' });
     }
     const sauceObjet = JSON.parse(req.body.sauce);
-    console.log(sauceObjet);
-    console.log(req.auth.userId);
     delete sauceObjet._id;
     delete sauceObjet.userId;
     const sauce = new Sauce({
@@ -19,13 +15,12 @@ exports.createSauce = (req, res, next) => {
         userId: req.auth.userId,
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     });
-    console.log(sauce);
     sauce.save()
         .then(() => { res.status(201).json({ message: 'Objet enregistré !' }) })
         .catch(error => { res.status(400).json({ error }) });
 };
 
-exports.GetOneSauce = (req, res, next) => {
+exports.getOneSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => res.status(200).json(sauce))
         .catch(error => res.status(404).json({ error }));
@@ -47,7 +42,7 @@ exports.modifySauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
         .then((sauce) => {
             if (sauce.userId != req.auth.userId) {
-                res.status(401).json({ message: 'non autorisé' });
+                res.status(403).json({ message: 'non autorisé' });
             } else {
                 if (req.file) {
                     const filename = sauce.imageUrl.split('/images/')[1];
@@ -55,7 +50,6 @@ exports.modifySauce = (req, res, next) => {
                         if (err) console.log(err);
                     });
                 }
-
                 Sauce.updateOne({ _id: req.params.id }, { ...sauceObjet, _id: req.params.id })
                     .then(() => res.status(200).json({ message: 'Objet modifié !' }))
                     .catch(error => res.status(401).json({ error }));
@@ -68,7 +62,7 @@ exports.deleteSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
             if (sauce.userId != req.auth.userId) {
-                res.status(401).json({ message: 'non autorisé' });
+                res.status(403).json({ message: 'non autorisé' });
             } else {
                 const filename = sauce.imageUrl.split('/images/')[1];
                 fs.unlink(`images/${filename}`, () => {
@@ -91,7 +85,6 @@ exports.likeSauce = (req, res, next) => {
                 case 1:
                     sauce.likes += 1;
                     sauce.usersLiked.push(req.body.userId);
-                    // console.log(sauce);
                     sauce.save();
                     res.status(200).json({ message: 'Like enregistré' });
                     break;
@@ -99,13 +92,11 @@ exports.likeSauce = (req, res, next) => {
                     if (sauce.usersLiked.includes(req.body.userId)) {
                         sauce.likes -= 1;
                         sauce.usersLiked = sauce.usersLiked.filter(user => user === !req.body.userId);
-                        // console.log(sauce);
                         sauce.save();
                         res.status(200).json({ message: 'Like annulé' });
                     } else {
                         sauce.dislikes -= 1;
                         sauce.usersDisliked = sauce.usersDisliked.filter(user => user === !req.body.userId);
-                        // console.log(sauce);
                         sauce.save();
                         res.status(200).json({ message: 'Dislike annulé' });
                     }
@@ -113,7 +104,6 @@ exports.likeSauce = (req, res, next) => {
                 case -1:
                     sauce.dislikes += 1;
                     sauce.usersDisliked.push(req.body.userId);
-                    // console.log(sauce);
                     sauce.save();
                     res.status(200).json({ message: 'Dislike enregistré' });
                     break;
